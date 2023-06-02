@@ -195,9 +195,13 @@ async function run() {
   })
 
   app.post('/payment',async(req,res)=>{
-     const body=req.body;
-     const result=await PaymentCollection.insertOne(body);
-     res.send(result)
+      const payment = req.body;
+     const insertResult = await  PaymentCollection.insertOne(payment);
+
+     const query = {_id: { $in: payment.cartItems.map(id => new ObjectId(id)) }}
+     const deleteResult = await cartsCollection.deleteMany(query)
+
+     res.send({ insertResult, deleteResult});
   })
   await client.db("admin").command({ ping: 1 });
   console.log("Pinged your deployment. You successfully connected to MongoDB!");
